@@ -384,6 +384,19 @@ public class CoreWorkload extends Workload {
     return prekey + value;
   }
 
+  public static String buildWriteKeyName(long keynum, int zeropadding, boolean orderedinserts) {
+    if (!orderedinserts) {
+        keynum = Utils.hash(keynum);
+    }
+    String value = Long.toString(keynum);
+    int fill = zeropadding - value.length();
+    String prekey = "usr";
+    for (int i = 0; i < fill; i++) {
+        prekey += '0';
+    }
+    return prekey + value;
+  }
+
   protected static NumberGenerator getFieldLengthGenerator(Properties p) throws WorkloadException {
     NumberGenerator fieldlengthgenerator;
     String fieldlengthdistribution = p.getProperty(
@@ -612,7 +625,7 @@ public class CoreWorkload extends Workload {
   @Override
   public boolean doInsert(DB db, Object threadstate) {
     int keynum = keysequence.nextValue().intValue();
-    String dbkey = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+    String dbkey = CoreWorkload.buildWriteKeyName(keynum, zeropadding, orderedinserts);
     HashMap<String, ByteIterator> values = buildValues(dbkey);
 
     Status status;
@@ -839,7 +852,7 @@ public class CoreWorkload extends Workload {
     long keynum = transactioninsertkeysequence.nextValue();
 
     try {
-      String dbkey = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+      String dbkey = CoreWorkload.buildWriteKeyName(keynum, zeropadding, orderedinserts);
 
       HashMap<String, ByteIterator> values = buildValues(dbkey);
       db.insert(table, dbkey, values);
